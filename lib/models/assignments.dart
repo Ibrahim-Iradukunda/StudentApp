@@ -1,12 +1,9 @@
-/// Assignment Model - Represents a single assignment
-///
-/// Author: [Yvette Uwimpaye] ← PUT YOUR NAME HERE
-/// Branch: assignments-feature
 class Assignment {
   String id;
   String title;
   DateTime dueDate;
   String courseName;
+  String assignmentType;
   String? priority;
   bool isCompleted;
 
@@ -15,6 +12,7 @@ class Assignment {
     required this.title,
     required this.dueDate,
     required this.courseName,
+    required this.assignmentType,
     this.priority,
     this.isCompleted = false,
   });
@@ -25,6 +23,7 @@ class Assignment {
       'title': title,
       'dueDate': dueDate.toIso8601String(),
       'courseName': courseName,
+      'assignmentType': assignmentType,
       'priority': priority,
       'isCompleted': isCompleted,
     };
@@ -36,6 +35,7 @@ class Assignment {
       title: json['title'],
       dueDate: DateTime.parse(json['dueDate']),
       courseName: json['courseName'],
+      assignmentType: json['assignmentType'] ?? 'Formative',
       priority: json['priority'],
       isCompleted: json['isCompleted'] ?? false,
     );
@@ -46,6 +46,7 @@ class Assignment {
     String? title,
     DateTime? dueDate,
     String? courseName,
+    String? assignmentType,
     String? priority,
     bool? isCompleted,
   }) {
@@ -54,6 +55,7 @@ class Assignment {
       title: title ?? this.title,
       dueDate: dueDate ?? this.dueDate,
       courseName: courseName ?? this.courseName,
+      assignmentType: assignmentType ?? this.assignmentType,
       priority: priority ?? this.priority,
       isCompleted: isCompleted ?? this.isCompleted,
     );

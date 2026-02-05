@@ -4,7 +4,7 @@ import '../utils/constant.dart';
 import '../utils/helpers.dart';
 
 /// Add/Edit Assignment Dialog
-/// Author: [Yvette Uwimpaye] ← PUT YOUR NAME HERE
+/// Author: Yvette Uwimpaye
 class AddAssignmentDialog extends StatefulWidget {
   final Assignment? assignment;
   final Function(Assignment) onSave;
@@ -26,6 +26,9 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
   late DateTime _selectedDate;
   String? _selectedPriority;
 
+  // ✅ ADD THIS
+  late String _assignmentType;
+
   @override
   void initState() {
     super.initState();
@@ -37,6 +40,9 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
     );
     _selectedDate = widget.assignment?.dueDate ?? DateTime.now();
     _selectedPriority = widget.assignment?.priority;
+
+    // ✅ ADD THIS
+    _assignmentType = widget.assignment?.assignmentType ?? 'Formative';
   }
 
   @override
@@ -80,6 +86,10 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
         title: _titleController.text.trim(),
         dueDate: _selectedDate,
         courseName: _courseController.text.trim(),
+
+        // ✅ THIS IS THE ACTUAL FIX
+        assignmentType: _assignmentType,
+
         priority: _selectedPriority,
         isCompleted: widget.assignment?.isCompleted ?? false,
       );
@@ -114,6 +124,8 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
                   ),
                 ),
                 const SizedBox(height: 24),
+
+                // ---- Title ----
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
@@ -137,7 +149,10 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
                     return null;
                   },
                 ),
+
                 const SizedBox(height: 16),
+
+                // ---- Course ----
                 TextFormField(
                   controller: _courseController,
                   decoration: InputDecoration(
@@ -161,7 +176,10 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
                     return null;
                   },
                 ),
+
                 const SizedBox(height: 16),
+
+                // ---- Due Date ----
                 InkWell(
                   onTap: _selectDate,
                   child: Container(
@@ -202,7 +220,10 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 16),
+
+                // ---- Priority ----
                 const Text(
                   'Priority (Optional)',
                   style: TextStyle(
@@ -224,25 +245,27 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
                           _selectedPriority = selected ? priority : null;
                         });
                       },
-                      selectedColor: PriorityLevel.getColor(priority)
-                          .withOpacity(0.3),
+                      selectedColor:
+                          PriorityLevel.getColor(priority).withOpacity(0.3),
                       labelStyle: TextStyle(
-                        color: isSelected 
-                            ? PriorityLevel.getColor(priority) 
+                        color: isSelected
+                            ? PriorityLevel.getColor(priority)
                             : AppColors.textGray,
-                        fontWeight: isSelected 
-                            ? FontWeight.bold 
-                            : FontWeight.normal,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
                       side: BorderSide(
-                        color: isSelected 
-                            ? PriorityLevel.getColor(priority) 
+                        color: isSelected
+                            ? PriorityLevel.getColor(priority)
                             : Colors.grey,
                       ),
                     );
                   }).toList(),
                 ),
+
                 const SizedBox(height: 24),
+
+                // ---- Actions ----
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [

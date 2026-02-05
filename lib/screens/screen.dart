@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import '../models/assignments.dart';
 import '../utils/constant.dart';
 import '../utils/helpers.dart';
 import '../widgets/add_assignment_dialog.dart';
 
 /// Assignments Screen - YOUR FEATURE
-/// Author: [Yvette Uwimpaye] ← PUT YOUR NAME HERE
+/// Author: [YOUR NAME HERE]
 class AssignmentsScreen extends StatefulWidget {
   final List<Assignment> assignments;
   final Function(Assignment) onAddAssignment;
@@ -26,22 +25,30 @@ class AssignmentsScreen extends StatefulWidget {
 }
 
 class _AssignmentsScreenState extends State<AssignmentsScreen> {
-  String _selectedFilter = 'All';
+  String _selectedFilter = 'All'; // All, Formative, Summative
 
   List<Assignment> _getFilteredAssignments() {
     List<Assignment> filtered;
-    
+
     switch (_selectedFilter) {
-      case 'Pending':
-        filtered = widget.assignments.where((a) => !a.isCompleted).toList();
+      case 'Formative':
+        // Show only Formative assignments
+        filtered = widget.assignments
+            .where((a) => a.assignmentType == 'Formative')
+            .toList();
         break;
-      case 'Completed':
-        filtered = widget.assignments.where((a) => a.isCompleted).toList();
+      case 'Summative':
+        // Show only Summative assignments
+        filtered = widget.assignments
+            .where((a) => a.assignmentType == 'Summative')
+            .toList();
         break;
       default:
+        // Show all assignments
         filtered = widget.assignments;
     }
-    
+
+    // Sort by due date (earliest first)
     filtered.sort((a, b) => a.dueDate.compareTo(b.dueDate));
     return filtered;
   }
@@ -139,6 +146,7 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
       ),
       body: Column(
         children: [
+          // Filter Tabs Section
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Row(
@@ -146,17 +154,23 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
                 _buildFilterChip('All', widget.assignments.length),
                 const SizedBox(width: 8),
                 _buildFilterChip(
-                  'Pending',
-                  widget.assignments.where((a) => !a.isCompleted).length,
+                  'Formative',
+                  widget.assignments
+                      .where((a) => a.assignmentType == 'Formative')
+                      .length,
                 ),
                 const SizedBox(width: 8),
                 _buildFilterChip(
-                  'Completed',
-                  widget.assignments.where((a) => a.isCompleted).length,
+                  'Summative',
+                  widget.assignments
+                      .where((a) => a.assignmentType == 'Summative')
+                      .length,
                 ),
               ],
             ),
           ),
+
+          // Assignments List Section
           Expanded(
             child: filteredAssignments.isEmpty
                 ? _buildEmptyState()
@@ -176,7 +190,7 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
 
   Widget _buildFilterChip(String label, int count) {
     final isSelected = _selectedFilter == label;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -186,8 +200,8 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected 
-              ? AppColors.accentYellow 
+          color: isSelected
+              ? AppColors.accentYellow
               : AppColors.white.withOpacity(0.1),
           borderRadius: BorderRadius.circular(20),
         ),
@@ -206,8 +220,8 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: isSelected 
-                    ? AppColors.primaryNavy.withOpacity(0.2) 
+                color: isSelected
+                    ? AppColors.primaryNavy.withOpacity(0.2)
                     : AppColors.white.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -255,29 +269,33 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
               children: [
                 Row(
                   children: [
+                    // Completion Checkbox
                     GestureDetector(
                       onTap: () => _toggleCompletion(assignment),
                       child: Container(
                         width: 24,
                         height: 24,
                         decoration: BoxDecoration(
-                          color: assignment.isCompleted 
-                              ? AppColors.successGreen 
+                          color: assignment.isCompleted
+                              ? AppColors.successGreen
                               : Colors.transparent,
                           border: Border.all(
-                            color: assignment.isCompleted 
-                                ? AppColors.successGreen 
+                            color: assignment.isCompleted
+                                ? AppColors.successGreen
                                 : AppColors.textGray,
                             width: 2,
                           ),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: assignment.isCompleted
-                            ? const Icon(Icons.check, size: 16, color: AppColors.white)
+                            ? const Icon(Icons.check,
+                                size: 16, color: AppColors.white)
                             : null,
                       ),
                     ),
                     const SizedBox(width: 12),
+
+                    // Assignment Title
                     Expanded(
                       child: Text(
                         assignment.title,
@@ -285,29 +303,38 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: AppColors.primaryNavy,
-                          decoration: assignment.isCompleted 
-                              ? TextDecoration.lineThrough 
+                          decoration: assignment.isCompleted
+                              ? TextDecoration.lineThrough
                               : null,
                         ),
                       ),
                     ),
-                    if (assignment.priority != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: PriorityLevel.getColor(assignment.priority)
-                              .withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          assignment.priority!,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: PriorityLevel.getColor(assignment.priority),
-                          ),
+
+                    // Assignment Type Badge (Formative/Summative)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: assignment.assignmentType == 'Formative'
+                            ? Colors.blue.withOpacity(0.1)
+                            : Colors.purple.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        assignment.assignmentType,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: assignment.assignmentType == 'Formative'
+                              ? Colors.blue
+                              : Colors.purple,
                         ),
                       ),
+                    ),
+
+                    const SizedBox(width: 8),
+
+                    // Delete Button
                     IconButton(
                       icon: const Icon(Icons.delete_outline, size: 20),
                       color: AppColors.textGray,
@@ -317,10 +344,14 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 8),
+
+                // Course Name
                 Row(
                   children: [
-                    Icon(Icons.book_outlined, size: 16, color: AppColors.textGray),
+                    Icon(Icons.book_outlined,
+                        size: 16, color: AppColors.textGray),
                     const SizedBox(width: 6),
                     Text(
                       assignment.courseName,
@@ -331,31 +362,40 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 8),
+
+                // Due Date
                 Row(
                   children: [
                     Icon(
                       Icons.calendar_today,
                       size: 16,
-                      color: isOverdue ? AppColors.warningRed : AppColors.textGray,
+                      color:
+                          isOverdue ? AppColors.warningRed : AppColors.textGray,
                     ),
                     const SizedBox(width: 6),
                     Text(
                       'Due: ${Helpers.formatDate(assignment.dueDate)}',
                       style: TextStyle(
                         fontSize: 14,
-                        color: isOverdue ? AppColors.warningRed : AppColors.textGray,
-                        fontWeight: isOverdue ? FontWeight.w600 : FontWeight.normal,
+                        color: isOverdue
+                            ? AppColors.warningRed
+                            : AppColors.textGray,
+                        fontWeight:
+                            isOverdue ? FontWeight.w600 : FontWeight.normal,
                       ),
                     ),
-                    if (!assignment.isCompleted && daysUntilDue >= 0 && daysUntilDue <= 7) ...[
+                    if (!assignment.isCompleted &&
+                        daysUntilDue >= 0 &&
+                        daysUntilDue <= 7) ...[
                       const SizedBox(width: 8),
                       Text(
                         '(${Helpers.getRelativeDateString(assignment.dueDate)})',
                         style: TextStyle(
                           fontSize: 12,
-                          color: daysUntilDue <= 2 
-                              ? AppColors.warningRed 
+                          color: daysUntilDue <= 2
+                              ? AppColors.warningRed
                               : AppColors.textGray,
                           fontStyle: FontStyle.italic,
                         ),
@@ -363,10 +403,13 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
                     ],
                   ],
                 ),
+
+                // Overdue Warning
                 if (isOverdue)
                   Container(
                     margin: const EdgeInsets.only(top: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppColors.warningRed.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(6),
@@ -411,8 +454,8 @@ class _AssignmentsScreenState extends State<AssignmentsScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            _selectedFilter == 'All' 
-                ? 'No assignments yet' 
+            _selectedFilter == 'All'
+                ? 'No assignments yet'
                 : 'No ${_selectedFilter.toLowerCase()} assignments',
             style: TextStyle(
               color: AppColors.white.withOpacity(0.7),

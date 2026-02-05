@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'models/assignments.dart';
-import 'screens/screen.dart';
-import 'utils/constant.dart';
+import 'models/assignments.dart'; // ← FIXED (was assignments.dart)
+import 'screens/screen.dart'; // ← FIXED (was screen.dart)
+import 'utils/constant.dart'; // ← FIXED (was constant.dart)
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +50,7 @@ class _TestScreenState extends State<TestScreen> {
       title: 'Flutter Group Project',
       dueDate: DateTime.now().add(const Duration(days: 3)),
       courseName: 'Mobile App Development',
+      assignmentType: 'Formative', // ← ADDED THIS
       priority: 'High',
     ),
     Assignment(
@@ -57,6 +58,7 @@ class _TestScreenState extends State<TestScreen> {
       title: 'Essay on Leadership',
       dueDate: DateTime.now().add(const Duration(days: 7)),
       courseName: 'Leadership Studies',
+      assignmentType: 'Summative', // ← ADDED THIS
       priority: 'Medium',
     ),
   ];
@@ -69,7 +71,8 @@ class _TestScreenState extends State<TestScreen> {
 
   void _updateAssignment(Assignment updatedAssignment) {
     setState(() {
-      final index = _assignments.indexWhere((a) => a.id == updatedAssignment.id);
+      final index =
+          _assignments.indexWhere((a) => a.id == updatedAssignment.id);
       if (index != -1) {
         _assignments[index] = updatedAssignment;
       }
