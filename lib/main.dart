@@ -1,121 +1,195 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'models/assignment.dart';
+import 'models/session.dart';
+import 'screens/dashboard_screen.dart';
+import 'screens/assignments_screen.dart';
+import 'screens/schedule_screen.dart';
+import 'utils/constants.dart';
+import 'utils/storage_helper.dart';
 
+/// Entry point of the ALU Academic Assistant application.
+/// Initializes Flutter bindings and launches the app.
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Set the status bar style to match our dark theme
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+    ),
+  );
+
+  runApp(const ALUAcademicAssistantApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+/// Root widget of the application.
+/// Configures the Material theme with ALU branding colors and
+/// sets up the main navigation shell.
+class ALUAcademicAssistantApp extends StatelessWidget {
+  const ALUAcademicAssistantApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'ALU Academic Assistant',
+      debugShowCheckedModeBanner: false,
+      // Dark theme configuration using ALU color palette
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: AppColors.primaryDark,
+        colorScheme: const ColorScheme.dark(
+          primary: AppColors.accentGold,
+          secondary: AppColors.accentGold,
+          surface: AppColors.primaryNavy,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: AppColors.primaryDark,
+          elevation: 0,
+        ),
+        // Snackbar theme
+        snackBarTheme: SnackBarThemeData(
+          backgroundColor: AppColors.primaryNavy,
+          contentTextStyle: const TextStyle(color: AppColors.textWhite),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          behavior: SnackBarBehavior.floating,
+        ),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MainNavigationShell(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+/// MainNavigationShell is the root stateful widget that manages:
+///   - Bottom navigation between the 3 main tabs
+///   - Loading and saving data to shared_preferences
+///   - Passing data down to child screens
+class MainNavigationShell extends StatefulWidget {
+  const MainNavigationShell({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MainNavigationShell> createState() => _MainNavigationShellState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _MainNavigationShellState extends State<MainNavigationShell> {
+  // Currently selected tab index for the BottomNavigationBar
+  int _currentIndex = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  // App-wide data lists — these are the single source of truth
+  List<Assignment> _assignments = [];
+  List<Session> _sessions = [];
+
+  // Loading flag for showing a progress indicator on first launch
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData(); // Load saved data from shared_preferences
+  }
+
+  /// Loads assignments and sessions from shared_preferences.
+  /// Called once on app startup to restore persisted data.
+  Future<void> _loadData() async {
+    try {
+      final assignments = await StorageHelper.loadAssignments();
+      final sessions = await StorageHelper.loadSessions();
+      setState(() {
+        _assignments = assignments;
+        _sessions = sessions;
+        _isLoading = false;
+      });
+    } catch (e) {
+      // If loading fails, start with empty lists
+      setState(() => _isLoading = false);
+    }
+  }
+
+  /// Callback for when assignments are modified by the Assignments screen.
+  /// Saves the updated list to shared_preferences and triggers a rebuild.
+  void _onAssignmentsChanged(List<Assignment> updated) {
+    setState(() => _assignments = updated);
+    StorageHelper.saveAssignments(updated);
+  }
+
+  /// Callback for when sessions are modified by the Schedule screen.
+  /// Saves the updated list to shared_preferences and triggers a rebuild.
+  void _onSessionsChanged(List<Session> updated) {
+    setState(() => _sessions = updated);
+    StorageHelper.saveSessions(updated);
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+    // Show loading spinner while data is being loaded
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: AppColors.primaryDark,
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.accentGold),
+        ),
+      );
+    }
+
+    // Build the list of screens — each receives the data it needs
+    final screens = [
+      DashboardScreen(
+        assignments: _assignments,
+        sessions: _sessions,
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+      AssignmentsScreen(
+        assignments: _assignments,
+        onAssignmentsChanged: _onAssignmentsChanged,
+      ),
+      ScheduleScreen(
+        sessions: _sessions,
+        onSessionsChanged: _onSessionsChanged,
+      ),
+    ];
+
+    return Scaffold(
+      // Display the currently selected screen
+      body: IndexedStack(
+        index: _currentIndex,
+        children: screens,
+      ),
+
+      // BottomNavigationBar with 3 primary tabs as specified
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: AppColors.primaryNavy,
+          border: Border(
+            top: BorderSide(color: AppColors.borderColor, width: 1),
+          ),
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (index) => setState(() => _currentIndex = index),
+          backgroundColor: AppColors.primaryNavy,
+          selectedItemColor: AppColors.accentGold,
+          unselectedItemColor: AppColors.textMuted,
+          type: BottomNavigationBarType.fixed,
+          selectedFontSize: 12,
+          unselectedFontSize: 12,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard_outlined),
+              activeIcon: Icon(Icons.dashboard),
+              label: 'Dashboard',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.assignment_outlined),
+              activeIcon: Icon(Icons.assignment),
+              label: 'Assignments',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_today_outlined),
+              activeIcon: Icon(Icons.calendar_today),
+              label: 'Schedule',
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
