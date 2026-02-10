@@ -1,3 +1,15 @@
+/// App Colors Constants File
+///
+/// This file defines the color palette for the entire ALU Student Academic Platform.
+/// It includes:
+/// - Brand colors (primary navy blue, secondary yellow, accent teal)
+/// - Status colors (success green, warning red)
+/// - Neutral colors (whites, grays)
+/// - Background and text colors for consistent theming
+///
+/// Used throughout the app with Material 3 design system
+/// Widgets: ColorScheme, ThemeData, Material Design colors
+///
 import 'package:flutter/material.dart';
 
 class AppColors {
@@ -69,14 +81,8 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
-        bodyLarge: TextStyle(
-          fontSize: 16,
-          color: AppColors.textPrimary,
-        ),
-        bodyMedium: TextStyle(
-          fontSize: 14,
-          color: AppColors.textSecondary,
-        ),
+        bodyLarge: TextStyle(fontSize: 16, color: AppColors.textPrimary),
+        bodyMedium: TextStyle(fontSize: 14, color: AppColors.textSecondary),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -94,7 +100,10 @@ class AppTheme {
           borderSide: const BorderSide(color: AppColors.secondary, width: 2),
         ),
         hintStyle: const TextStyle(color: AppColors.textSecondary),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
       ),
     );
   }

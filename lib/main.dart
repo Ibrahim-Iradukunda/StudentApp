@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/app_state_provider.dart';
+import 'providers/app_provider.dart';
 import 'screens/login_screen.dart';
-import 'screens/dashboard_placeholder.dart';
+import 'screens/signup_screen.dart';
+import 'screens/home_screen.dart';
+import 'risk_status/risk_status_screen.dart';
 import 'services/auth_service.dart';
+import 'services/storage_service.dart';
 import 'utils/alu_colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   final appState = AppStateProvider();
   await appState.init();
 
   runApp(
     MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: appState),
-      ],
+      providers: [ChangeNotifierProvider.value(value: appState)],
       child: const MyApp(),
     ),
   );
@@ -32,9 +34,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: ALUColors.primary,
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: ALUColors.primary,
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: ALUColors.primary),
       ),
       home: const AuthCheckScreen(),
       debugShowCheckedModeBanner: false,
@@ -61,12 +61,12 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
 
   Future<void> _checkAuth() async {
     final isLoggedIn = await _authService.isLoggedIn();
-    
+
     if (!mounted) return;
 
     if (isLoggedIn) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const DashboardPlaceholder()),
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } else {
       Navigator.of(context).pushReplacement(
@@ -90,16 +90,10 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
                 color: ALUColors.accent,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.school,
-                size: 40,
-                color: ALUColors.primary,
-              ),
+              child: Icon(Icons.school, size: 40, color: ALUColors.primary),
             ),
             const SizedBox(height: 20),
-            const CircularProgressIndicator(
-              color: ALUColors.accent,
-            ),
+            const CircularProgressIndicator(color: ALUColors.accent),
           ],
         ),
       ),

@@ -1,23 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import '../screens/home_screen.dart';
 
-void main() {
-  runApp(const RiskApp());
-}
-
-class RiskApp extends StatelessWidget {
-  const RiskApp({super.key});
+class RiskStatusScreen extends StatefulWidget {
+  const RiskStatusScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const RiskStatusScreen(),
-    );
-  }
+  State<RiskStatusScreen> createState() => _RiskStatusScreenState();
 }
 
-class RiskStatusScreen extends StatelessWidget {
-  const RiskStatusScreen({super.key});
+class _RiskStatusScreenState extends State<RiskStatusScreen> {
+  String _userName = 'User';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final currentUserJson = prefs.getString('current_user');
+    if (currentUserJson != null) {
+      try {
+        final userMap = Map<String, dynamic>.from(jsonDecode(currentUserJson));
+        setState(() {
+          _userName = userMap['name'] ?? 'User';
+        });
+      } catch (e) {
+        print('Error parsing user: $e');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +43,7 @@ class RiskStatusScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF0A1A3A),
-              Color(0xFF020C1E),
-            ],
+            colors: [Color(0xFF0A1A3A), Color(0xFF020C1E)],
           ),
         ),
         child: SafeArea(
@@ -42,10 +54,23 @@ class RiskStatusScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
-                  children: const [
-                    Icon(Icons.arrow_back, color: Colors.white),
-                    SizedBox(width: 12),
-                    Text(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () {
+                        if (Navigator.of(context).canPop()) {
+                          Navigator.of(context).pop();
+                        } else {
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (_) => const HomeScreen(),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
                       "Your Risk Status",
                       style: TextStyle(
                         color: Colors.white,
@@ -60,11 +85,11 @@ class RiskStatusScreen extends StatelessWidget {
               const SizedBox(height: 32),
 
               // Greeting
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  "Hello Alex  At Risk",
-                  style: TextStyle(
+                  "Hello $_userName  At Risk",
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -80,20 +105,42 @@ class RiskStatusScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: const [
-                    RiskCard(
-                      percentage: "75%",
-                      label: "Attendance",
-                      color: Color(0xFFE53935),
+                    RiskCard(percentage: "75%", color: Color(0xFFE53935)),
+                    RiskCard(percentage: "60%", color: Color(0xFFF9A825)),
+                    RiskCard(percentage: "63%", color: Color(0xFFF57C00)),
+                  ],
+                ),
+              ),
+
+              // Labels under cards
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Expanded(
+                      child: Text(
+                        'Attendance',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white70),
+                      ),
                     ),
-                    RiskCard(
-                      percentage: "60%",
-                      label: "Assignment to\nStatement",
-                      color: Color(0xFFF9A825),
+                    Expanded(
+                      child: Text(
+                        'Assignment to\nStatement',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white70),
+                      ),
                     ),
-                    RiskCard(
-                      percentage: "63%",
-                      label: "Average\nExams",
-                      color: Color(0xFFF57C00),
+                    Expanded(
+                      child: Text(
+                        'Average\nExams',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white70),
+                      ),
                     ),
                   ],
                 ),
@@ -128,33 +175,6 @@ class RiskStatusScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 24),
-
-              // Bottom Navigation
-              BottomNavigationBar(
-                backgroundColor: const Color(0xFF020C1E),
-                selectedItemColor: const Color(0xFFFFD600),
-                unselectedItemColor: Colors.grey,
-                currentIndex: 3,
-                type: BottomNavigationBarType.fixed,
-                items: const [
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.home),
-                    label: "Dashboard",
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.analytics),
-                    label: "Analytics",
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.school),
-                    label: "Learning",
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.person),
-                    label: "Me",
-                  ),
-                ],
-              ),
             ],
           ),
         ),
@@ -165,15 +185,9 @@ class RiskStatusScreen extends StatelessWidget {
 
 class RiskCard extends StatelessWidget {
   final String percentage;
-  final String label;
   final Color color;
 
-  const RiskCard({
-    super.key,
-    required this.percentage,
-    required this.label,
-    required this.color,
-  });
+  const RiskCard({super.key, required this.percentage, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -192,15 +206,6 @@ class RiskCard extends StatelessWidget {
               color: Colors.white,
               fontSize: 22,
               fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
             ),
           ),
         ],
