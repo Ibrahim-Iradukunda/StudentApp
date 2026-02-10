@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../utils/alu_colors.dart';
 import '../services/auth_service.dart';
 import 'signup_screen.dart';
-import 'dashboard_placeholder.dart';
+import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -41,17 +41,14 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (result['success']) {
-      // Navigate to Dashboard
+      // Navigate to Home
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const DashboardPlaceholder()),
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } else {
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message']),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(result['message']), backgroundColor: Colors.red),
       );
     }
   }
@@ -83,11 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: ALUColors.accent,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.school,
-                    size: 40,
-                    color: ALUColors.primary,
-                  ),
+                  child: Icon(Icons.school, size: 40, color: ALUColors.primary),
                 ),
 
                 const SizedBox(height: 30),
@@ -106,10 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const Text(
                   'Login to your account',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
                 ),
 
                 const SizedBox(height: 50),
@@ -195,10 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const Text(
                       'Don\'t have an account? ',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                     GestureDetector(
                       onTap: _navigateToSignUp,

@@ -20,6 +20,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureRepeatPassword = true;
+  List<String> _selectedCourses = [];
+
+  final List<String> _availableCourses = [
+    'Introduction to Linux and in Tolkе',
+    'Introduction to Python Programming',
+    'Front End Web Development',
+  ];
 
   @override
   void dispose() {
@@ -59,10 +66,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     } else {
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message']),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(result['message']), backgroundColor: Colors.red),
       );
     }
   }
@@ -87,11 +91,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     color: ALUColors.accent,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.school,
-                    size: 40,
-                    color: ALUColors.primary,
-                  ),
+                  child: Icon(Icons.school, size: 40, color: ALUColors.primary),
                 ),
                 const SizedBox(height: 30),
                 // Title
@@ -167,7 +167,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   isPassword: true,
                   obscureText: _obscureRepeatPassword,
                   onToggleVisibility: () {
-                    setState(() => _obscureRepeatPassword = !_obscureRepeatPassword);
+                    setState(
+                      () => _obscureRepeatPassword = !_obscureRepeatPassword,
+                    );
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -178,6 +180,75 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     }
                     return null;
                   },
+                ),
+                const SizedBox(height: 40),
+                // Course Selection
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Select Your Courses',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Column(
+                  children: _availableCourses.map((course) {
+                    final isSelected = _selectedCourses.contains(course);
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (isSelected) {
+                            _selectedCourses.remove(course);
+                          } else {
+                            _selectedCourses.add(course);
+                          }
+                        });
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? ALUColors.accent
+                              : const Color(0xFF1A3A52),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isSelected ? ALUColors.accent : Colors.grey,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                course,
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? Colors.black
+                                      : Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            Icon(
+                              isSelected
+                                  ? Icons.check_circle
+                                  : Icons.circle_outlined,
+                              color: isSelected ? Colors.black : Colors.grey,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
                 const SizedBox(height: 40),
                 // Sign Up Button
@@ -210,6 +281,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
                           ),
                   ),
+                ),
+                const SizedBox(height: 20),
+                // Log In link for existing users
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Already have an account? ',
+                      style: TextStyle(color: Colors.white, fontSize: 14),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => const LoginScreen(),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        'Log In',
+                        style: TextStyle(
+                          color: ALUColors.accent,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 30),
               ],
